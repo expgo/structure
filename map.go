@@ -206,6 +206,12 @@ func Value2ValueWithOption(from reflect.Value, to reflect.Value, option *MapOpti
 		return nil
 	}
 
+	if from.CanInterface() {
+		if wrapper, ok := from.Interface().(ValueWrapper); ok {
+			return MapToValueWithOption(wrapper.Value(), to, option)
+		}
+	}
+
 	if to.Kind() == reflect.Ptr || from.Kind() == reflect.Ptr {
 		return value2valuePtrWithOption(from, to, option)
 	}
