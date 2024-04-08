@@ -24,7 +24,7 @@ func TestInt64value2intMapper(t *testing.T) {
 			from := reflect.ValueOf(tt.input)
 			var to int
 			toV := reflect.ValueOf(&to).Elem()
-			err := int64value2intMapper(from, toV)
+			err := int64value2intMapper(from, toV, nil)
 			if err != nil {
 				t.Fatalf("Unexpected error: %v", err)
 			}
@@ -53,7 +53,7 @@ func TestInt2int64valueMapper(t *testing.T) {
 			from := reflect.ValueOf(tt.input)
 			var to wrapperspb.Int64Value
 			toV := reflect.ValueOf(&to).Elem()
-			err := int2int64valueMapper(from, toV)
+			err := int2int64valueMapper(from, toV, nil)
 			if err != nil {
 				t.Fatalf("Unexpected error: %v", err)
 			}

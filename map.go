@@ -9,27 +9,35 @@ import (
 	"strings"
 )
 
-type MapOption struct {
-	ZeroFields           bool
-	WeaklyTypedInput     bool
-	StringSplitSeparator string
-}
+type Mapper func(from reflect.Value, to reflect.Value, option *Option) error
 
-type Mapper func(from reflect.Value, to reflect.Value) error
-
-type mapperKey struct {
+type typeKey struct {
 	from reflect.Type
 	to   reflect.Type
 }
 
-var mapperCache = generic.Map[mapperKey, Mapper]{}
+var typeMappers = generic.Map[typeKey, Mapper]{}
+
+type kindKey struct {
+	from reflect.Kind
+	to   reflect.Kind
+}
+
+var kindMappers = generic.Map[kindKey, Mapper]{}
 
 func RegisterMapper[From any, To any](mapper Mapper) {
 	fromType := reflect.TypeOf((*From)(nil)).Elem()
 	toType := reflect.TypeOf((*To)(nil)).Elem()
 
-	key := mapperKey{from: fromType, to: toType}
-	if _, got := mapperCache.LoadOrStore(key, mapper); got {
+	key := typeKey{from: fromType, to: toType}
+	if _, got := typeMappers.LoadOrStore(key, mapper); got {
+		panic(fmt.Sprintf("type %+v already registed", key))
+	}
+}
+
+func RegisterKindMapper(from reflect.Kind, to reflect.Kind, mapper Mapper) {
+	key := kindKey{from: from, to: to}
+	if _, got := kindMappers.LoadOrStore(key, mapper); got {
 		panic(fmt.Sprintf("type %+v already registed", key))
 	}
 }
@@ -38,38 +46,42 @@ func ReplaceMapper[From any, To any](mapper Mapper) {
 	fromType := reflect.TypeOf((*From)(nil)).Elem()
 	toType := reflect.TypeOf((*To)(nil)).Elem()
 
-	mapperCache.Store(mapperKey{from: fromType, to: toType}, mapper)
+	typeMappers.Store(typeKey{from: fromType, to: toType}, mapper)
 }
 
-func NewMapOption() *MapOption {
-	return &MapOption{
+func NewOption() *Option {
+	return &Option{
 		ZeroFields:           true,
 		WeaklyTypedInput:     true,
 		StringSplitSeparator: ",",
+		TagName:              "mapping",
+		MatchName:            strings.EqualFold,
 	}
 }
 
-var defaultMapOption = NewMapOption()
+var defaultOption = NewOption()
 
 func Map(from, to any) error {
-	return MapWithOption(from, to, defaultMapOption)
+	return MapWithOption(from, to, defaultOption)
 }
 
-func MapWithOption(from, to any, option *MapOption) error {
+func MapWithOption(from, to any, option *Option) error {
 	return MapToValueWithOption(from, reflect.Indirect(reflect.ValueOf(to)), option)
 }
 
 func MapToValue(from any, to reflect.Value) error {
-	return MapToValueWithOption(from, to, defaultMapOption)
+	return MapToValueWithOption(from, to, defaultOption)
 }
 
-func MapToValueWithOption(from any, to reflect.Value, option *MapOption) error {
+func MapToValueWithOption(from any, to reflect.Value, option *Option) error {
 	if option == nil {
-		option = defaultMapOption
+		option = defaultOption
 	}
 
-	if !to.CanSet() {
-		return errors.New("to value can't be set")
+	if to.Kind() != reflect.Map {
+		if !to.CanSet() {
+			return errors.New("to value can't be set")
+		}
 	}
 
 	var fromVal reflect.Value
@@ -95,7 +107,7 @@ func MapToValueWithOption(from any, to reflect.Value, option *MapOption) error {
 	return Value2ValueWithOption(fromVal, to, option)
 }
 
-func value2valuePtrWithOption(from reflect.Value, to reflect.Value, option *MapOption) error {
+func value2valuePtrWithOption(from reflect.Value, to reflect.Value, option *Option) error {
 	toElemType := to.Type()
 	if toElemType.Kind() == reflect.Ptr {
 		toElemType = toElemType.Elem()
@@ -120,7 +132,7 @@ func value2valuePtrWithOption(from reflect.Value, to reflect.Value, option *MapO
 	return nil
 }
 
-func value2valueSliceWithOption(from reflect.Value, to reflect.Value, option *MapOption) error {
+func value2valueSliceWithOption(from reflect.Value, to reflect.Value, option *Option) error {
 	dataVal := from
 	fromKind := dataVal.Kind()
 	valType := to.Type()
@@ -198,7 +210,7 @@ func value2valueSliceWithOption(from reflect.Value, to reflect.Value, option *Ma
 	return nil
 }
 
-func Value2ValueWithOption(from reflect.Value, to reflect.Value, option *MapOption) error {
+func Value2ValueWithOption(from reflect.Value, to reflect.Value, option *Option) error {
 	if !from.IsValid() {
 		// If the input value is invalid, then we just set the value
 		// to be the zero value.
@@ -229,6 +241,13 @@ func Value2ValueWithOption(from reflect.Value, to reflect.Value, option *MapOpti
 		return nil
 	}
 
+	if mapper, ok := kindMappers.Load(kindKey{from: fromType.Kind(), to: toType.Kind()}); ok {
+		if err := mapper(from, to, option); err != nil {
+			return err
+		}
+		return nil
+	}
+
 	// if to kind is a interface, and from type can convert to , convert and return
 	if toType.Kind() == reflect.Interface && fromType.ConvertibleTo(toType) {
 		to.Set(from.Convert(toType))
@@ -236,24 +255,24 @@ func Value2ValueWithOption(from reflect.Value, to reflect.Value, option *MapOpti
 	}
 
 	// use type and to, get mapper
-	mapper, ok := mapperCache.Load(mapperKey{from: fromType, to: toType})
+	mapper, ok := typeMappers.Load(typeKey{from: fromType, to: toType})
 	if !ok {
 		// do type alias
 		fromType, _ = typeAliasMap.LoadOrStore(fromType, fromType)
 		toType, _ = typeAliasMap.LoadOrStore(toType, toType)
 
-		mapper, ok = mapperCache.Load(mapperKey{from: fromType, to: toType})
+		mapper, ok = typeMappers.Load(typeKey{from: fromType, to: toType})
 	}
 
 	if ok {
-		if err := mapper(from, to); err != nil {
+		if err := mapper(from, to, option); err != nil {
 			return err
 		}
 		return nil
 	}
 
 	// get all implements interface, no err, return direct
-	cachePairs := stream.Must(mapperCache.FilterToStream(func(k mapperKey, v Mapper) bool {
+	cachePairs := stream.Must(typeMappers.FilterToStream(func(k typeKey, v Mapper) bool {
 		if k.to.Kind() == reflect.Interface {
 			return toType.Implements(k.to) || reflect.PtrTo(toType).Implements(k.to)
 		}
@@ -261,13 +280,9 @@ func Value2ValueWithOption(from reflect.Value, to reflect.Value, option *MapOpti
 	}).ToSlice())
 
 	for _, cachePair := range cachePairs {
-		if err := cachePair.V(from, to); err == nil {
+		if err := cachePair.V(from, to, option); err == nil {
 			return nil
 		}
-	}
-
-	if to.Kind() == reflect.Struct {
-
 	}
 
 	return errors.New(fmt.Sprintf("no mapper found for type %+v to %+v", fromType, toType))

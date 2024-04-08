@@ -13,12 +13,12 @@ func init() {
 	structure.RegisterMapper[int64, wrapperspb.Int64Value](int2int64valueMapper)
 }
 
-func int64value2intMapper(from reflect.Value, to reflect.Value) error {
+func int64value2intMapper(from reflect.Value, to reflect.Value, _ *structure.Option) error {
 	to.SetInt(from.Interface().(wrapperspb.Int64Value).Value)
 	return nil
 }
 
-func int2int64valueMapper(from reflect.Value, to reflect.Value) error {
+func int2int64valueMapper(from reflect.Value, to reflect.Value, _ *structure.Option) error {
 	to.FieldByName("Value").SetInt(from.Int())
 	return nil
 }

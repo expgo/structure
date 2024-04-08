@@ -66,7 +66,7 @@ func TestString2boolMapper(t *testing.T) {
 			var to reflect.Value
 			var toType bool
 			to = reflect.ValueOf(&toType).Elem()
-			err := string2boolMapper(from, to)
+			err := string2boolMapper(from, to, nil)
 
 			if (err != nil) != tt.wantErr {
 				t.Errorf("string2boolMapper() error = %v, wantErr %v", err, tt.wantErr)
@@ -127,7 +127,7 @@ func TestString2intMapper(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			err := string2intMapper(tc.from, tc.to)
+			err := string2intMapper(tc.from, tc.to, nil)
 
 			if tc.err {
 				if err == nil {
@@ -193,7 +193,7 @@ func Test_string2uintMapper(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := string2uintMapper(tt.args.from, tt.args.to); (err != nil) != tt.wantErr {
+			if err := string2uintMapper(tt.args.from, tt.args.to, nil); (err != nil) != tt.wantErr {
 				t.Errorf("string2uintMapper() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
@@ -245,7 +245,7 @@ func TestString2floatMapper(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := string2floatMapper(tt.from, tt.to)
+			err := string2floatMapper(tt.from, tt.to, nil)
 			if tt.expectErr {
 				if err == nil {
 					t.Errorf("expected error but received none")
@@ -280,7 +280,7 @@ func TestString2StringMapper(t *testing.T) {
 			from := reflect.ValueOf(tt.from)
 			to := reflect.New(reflect.TypeOf(tt.from)).Elem()
 
-			err := string2stringMapper(from, to)
+			err := string2stringMapper(from, to, nil)
 
 			if err != nil {
 				t.Errorf("Unexpected error: %v", err)

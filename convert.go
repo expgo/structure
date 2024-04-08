@@ -14,14 +14,14 @@ func Must[T any](t T, err error) T {
 }
 
 func ConvertTo[T any](from any) (T, error) {
-	return ConvertToWithOption[T](from, defaultMapOption)
+	return ConvertToWithOption[T](from, defaultOption)
 }
 
 func MustConvertTo[T any](from any) T {
 	return Must(ConvertTo[T](from))
 }
 
-func ConvertToWithOption[T any](from any, option *MapOption) (t T, err error) {
+func ConvertToWithOption[T any](from any, option *Option) (t T, err error) {
 	result, err := ConvertToTypeWithOption(from, reflect.TypeOf((*T)(nil)).Elem(), option)
 	if err != nil {
 		return t, err
@@ -31,16 +31,16 @@ func ConvertToWithOption[T any](from any, option *MapOption) (t T, err error) {
 }
 
 func ConvertToType(from any, toType reflect.Type) (any, error) {
-	return ConvertToTypeWithOption(from, toType, defaultMapOption)
+	return ConvertToTypeWithOption(from, toType, defaultOption)
 }
 
 func MustConvertToType(from any, toType reflect.Type) any {
 	return Must(ConvertToType(from, toType))
 }
 
-func ConvertToTypeWithOption(from any, toType reflect.Type, option *MapOption) (any, error) {
+func ConvertToTypeWithOption(from any, toType reflect.Type, option *Option) (any, error) {
 	if option == nil {
-		option = defaultMapOption
+		option = defaultOption
 	}
 
 	result := reflect.New(toType).Elem()
@@ -52,16 +52,16 @@ func ConvertToTypeWithOption(from any, toType reflect.Type, option *MapOption) (
 }
 
 func ConvertToKind(from any, toKind reflect.Kind) (any, error) {
-	return ConvertToKindWithOption(from, toKind, defaultMapOption)
+	return ConvertToKindWithOption(from, toKind, defaultOption)
 }
 
 func MustConvertToKind(from any, toKind reflect.Kind) any {
 	return Must(ConvertToKind(from, toKind))
 }
 
-func ConvertToKindWithOption(from any, toKind reflect.Kind, option *MapOption) (any, error) {
+func ConvertToKindWithOption(from any, toKind reflect.Kind, option *Option) (any, error) {
 	if option == nil {
-		option = defaultMapOption
+		option = defaultOption
 	}
 
 	switch toKind {

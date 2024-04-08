@@ -15,7 +15,7 @@ func init() {
 	RegisterMapper[string, string](string2stringMapper)
 }
 
-func string2boolMapper(from reflect.Value, to reflect.Value) error {
+func string2boolMapper(from reflect.Value, to reflect.Value, _ *Option) error {
 	str := strings.TrimSpace(from.String())
 	b, err := strconv.ParseBool(str)
 	if err == nil {
@@ -28,7 +28,7 @@ func string2boolMapper(from reflect.Value, to reflect.Value) error {
 	return nil
 }
 
-func string2intMapper(from reflect.Value, to reflect.Value) error {
+func string2intMapper(from reflect.Value, to reflect.Value, _ *Option) error {
 	str := strings.TrimSpace(from.String())
 	if str == "" {
 		str = "0"
@@ -44,7 +44,7 @@ func string2intMapper(from reflect.Value, to reflect.Value) error {
 	return nil
 }
 
-func string2uintMapper(from reflect.Value, to reflect.Value) error {
+func string2uintMapper(from reflect.Value, to reflect.Value, _ *Option) error {
 	str := strings.TrimSpace(from.String())
 	if str == "" {
 		str = "0"
@@ -60,7 +60,7 @@ func string2uintMapper(from reflect.Value, to reflect.Value) error {
 	return nil
 }
 
-func string2floatMapper(from reflect.Value, to reflect.Value) error {
+func string2floatMapper(from reflect.Value, to reflect.Value, _ *Option) error {
 	str := strings.TrimSpace(from.String())
 	if str == "" {
 		str = "0"
@@ -76,7 +76,7 @@ func string2floatMapper(from reflect.Value, to reflect.Value) error {
 	return nil
 }
 
-func string2stringMapper(from reflect.Value, to reflect.Value) error {
+func string2stringMapper(from reflect.Value, to reflect.Value, _ *Option) error {
 	to.SetString(from.String())
 	return nil
 }

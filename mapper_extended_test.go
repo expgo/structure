@@ -39,7 +39,7 @@ func TestString2TextUnmarshalerMapper(t *testing.T) {
 			from := reflect.ValueOf(testCase.from)
 			to := reflect.ValueOf(testCase.expected)
 
-			err := string2TextUnmarshalerMapper(from, to)
+			err := string2TextUnmarshalerMapper(from, to, nil)
 
 			if err != nil {
 				if !testCase.isError {
@@ -89,7 +89,7 @@ func TestString2TBinaryUnmarshalerMapper(t *testing.T) {
 
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
-			err := string2BinaryUnmarshalerMapper(reflect.ValueOf(tt.from), reflect.ValueOf(tt.to))
+			err := string2BinaryUnmarshalerMapper(reflect.ValueOf(tt.from), reflect.ValueOf(tt.to), nil)
 			if err != nil {
 				if !tt.wantErr {
 					t.Errorf("string2BinaryUnmarshalerMapper() error = %v, wantErr %v", err, tt.wantErr)
@@ -147,7 +147,7 @@ func TestStringToDurationMapper(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			from := reflect.ValueOf(tt.input)
 			to := reflect.New(reflect.TypeOf((*time.Duration)(nil)).Elem()).Elem()
-			err := string2durationMapper(from, to)
+			err := string2durationMapper(from, to, nil)
 			if (err != nil) != tt.err {
 				t.Errorf("string2durationMapper() error = %v, expected error? %v", err, tt.err)
 			}

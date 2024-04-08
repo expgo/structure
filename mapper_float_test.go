@@ -31,7 +31,7 @@ func TestFloat2BoolMapper(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var to = reflect.ValueOf(new(bool)).Elem()
-			err := float2boolMapper(tt.from, to)
+			err := float2boolMapper(tt.from, to, nil)
 			if err != nil {
 				t.Errorf("float2boolMapper() error = %v", err)
 				return
@@ -83,7 +83,7 @@ func TestFloat2IntMapper(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := float2intMapper(tt.args.from, tt.args.to); (err != nil) != tt.wantErr {
+			if err := float2intMapper(tt.args.from, tt.args.to, nil); (err != nil) != tt.wantErr {
 				t.Errorf("float2intMapper() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
@@ -128,7 +128,7 @@ func TestFloat2uintMapper(t *testing.T) {
 			from := reflect.ValueOf(tt.input)
 			to := reflect.New(reflect.TypeOf(tt.want)).Elem()
 
-			err := float2uintMapper(from, to)
+			err := float2uintMapper(from, to, nil)
 
 			if err != tt.err {
 				t.Errorf("float2uintMapper() error = %v, wantErr %v", err, tt.err)
@@ -195,7 +195,7 @@ func TestFloat2FloatMapper(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := float2floatMapper(tt.args.from, tt.args.to); (err != nil) != tt.wantErr {
+			if err := float2floatMapper(tt.args.from, tt.args.to, nil); (err != nil) != tt.wantErr {
 				t.Errorf("float2floatMapper() error = %v, wantErr %v", err, tt.wantErr)
 			}
 			if got, want := tt.args.to.Float(), tt.args.from.Float(); got != want {
@@ -224,7 +224,7 @@ func TestFloat2stringMapper(t *testing.T) {
 			from := reflect.ValueOf(tt.float)
 			to := reflect.New(reflect.TypeOf(""))
 
-			err := float2stringMapper(from, to.Elem())
+			err := float2stringMapper(from, to.Elem(), nil)
 			if err != nil {
 				t.Errorf("float2stringMapper() error = %v", err)
 				return

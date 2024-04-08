@@ -10,12 +10,12 @@ func init() {
 	RegisterMapper[bool, string](bool2stringMapper)
 }
 
-func bool2boolMapper(from reflect.Value, to reflect.Value) error {
+func bool2boolMapper(from reflect.Value, to reflect.Value, _ *Option) error {
 	to.SetBool(from.Bool())
 	return nil
 }
 
-func bool2intMapper(from reflect.Value, to reflect.Value) error {
+func bool2intMapper(from reflect.Value, to reflect.Value, _ *Option) error {
 	if from.Bool() {
 		to.SetInt(1)
 	} else {
@@ -24,7 +24,7 @@ func bool2intMapper(from reflect.Value, to reflect.Value) error {
 	return nil
 }
 
-func bool2uintMapper(from reflect.Value, to reflect.Value) error {
+func bool2uintMapper(from reflect.Value, to reflect.Value, _ *Option) error {
 	if from.Bool() {
 		to.SetUint(1)
 	} else {
@@ -33,7 +33,7 @@ func bool2uintMapper(from reflect.Value, to reflect.Value) error {
 	return nil
 }
 
-func bool2floatMapper(from reflect.Value, to reflect.Value) error {
+func bool2floatMapper(from reflect.Value, to reflect.Value, _ *Option) error {
 	if from.Bool() {
 		to.SetFloat(1)
 	} else {
@@ -42,7 +42,7 @@ func bool2floatMapper(from reflect.Value, to reflect.Value) error {
 	return nil
 }
 
-func bool2stringMapper(from reflect.Value, to reflect.Value) error {
+func bool2stringMapper(from reflect.Value, to reflect.Value, _ *Option) error {
 	if from.Bool() {
 		to.SetString("true")
 	} else {

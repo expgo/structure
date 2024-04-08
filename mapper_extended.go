@@ -14,7 +14,7 @@ func init() {
 	RegisterMapper[string, time.Duration](string2durationMapper)
 }
 
-func string2TextUnmarshalerMapper(from reflect.Value, to reflect.Value) error {
+func string2TextUnmarshalerMapper(from reflect.Value, to reflect.Value, _ *Option) error {
 	textUnmarshaler, ok := to.Interface().(encoding.TextUnmarshaler)
 	if !ok {
 		if to.CanAddr() {
@@ -33,7 +33,7 @@ func string2TextUnmarshalerMapper(from reflect.Value, to reflect.Value) error {
 	return errors.New(fmt.Sprintf("type %s could not convert to TextUnmarshaler", to.Type()))
 }
 
-func string2BinaryUnmarshalerMapper(from reflect.Value, to reflect.Value) error {
+func string2BinaryUnmarshalerMapper(from reflect.Value, to reflect.Value, _ *Option) error {
 	binaryUnmarshaler, ok := to.Interface().(encoding.BinaryUnmarshaler)
 	if !ok {
 		if to.CanAddr() {
@@ -53,7 +53,7 @@ func string2BinaryUnmarshalerMapper(from reflect.Value, to reflect.Value) error 
 	return errors.New(fmt.Sprintf("type %s could not convert to BinaryUnmarshaler", to.Type()))
 }
 
-func string2durationMapper(from reflect.Value, to reflect.Value) error {
+func string2durationMapper(from reflect.Value, to reflect.Value, _ *Option) error {
 	s, err := time.ParseDuration(from.String())
 	if err != nil {
 		return errors.New(fmt.Sprintf("unable to parse duration: %v", err))

@@ -13,27 +13,27 @@ func init() {
 	RegisterMapper[float64, string](float2stringMapper)
 }
 
-func float2boolMapper(from reflect.Value, to reflect.Value) error {
+func float2boolMapper(from reflect.Value, to reflect.Value, _ *Option) error {
 	to.SetBool(from.Float() != 0)
 	return nil
 }
 
-func float2intMapper(from reflect.Value, to reflect.Value) error {
+func float2intMapper(from reflect.Value, to reflect.Value, _ *Option) error {
 	to.SetInt(int64(from.Float()))
 	return nil
 }
 
-func float2uintMapper(from reflect.Value, to reflect.Value) error {
+func float2uintMapper(from reflect.Value, to reflect.Value, _ *Option) error {
 	to.SetUint(uint64(from.Float()))
 	return nil
 }
 
-func float2floatMapper(from reflect.Value, to reflect.Value) error {
+func float2floatMapper(from reflect.Value, to reflect.Value, _ *Option) error {
 	to.SetFloat(from.Float())
 	return nil
 }
 
-func float2stringMapper(from reflect.Value, to reflect.Value) error {
+func float2stringMapper(from reflect.Value, to reflect.Value, _ *Option) error {
 	to.SetString(strconv.FormatFloat(from.Float(), 'g', -1, 64))
 	return nil
 }

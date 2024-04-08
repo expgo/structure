@@ -1,6 +1,7 @@
 package structure
 
 import (
+	"github.com/stretchr/testify/assert"
 	"net/url"
 	"reflect"
 	"testing"
@@ -196,4 +197,58 @@ func TestMustConvertTo(t *testing.T) {
 
 func TestTest(t *testing.T) {
 	println(ConvertTo[*string]("123"))
+}
+
+type A struct {
+	A string
+	B bool
+}
+
+type B struct {
+	A int
+	B string
+}
+
+func TestStruct2Struct(t *testing.T) {
+	a := &A{
+		A: "123",
+		B: true,
+	}
+
+	b := Must(ConvertTo[*B](a))
+	assert.Equal(t, 123, b.A)
+	assert.Equal(t, "true", b.B)
+}
+
+func TestStruct2MapString(t *testing.T) {
+	a := &A{
+		A: "123",
+		B: true,
+	}
+
+	b := Must(ConvertTo[map[string]string](a))
+	assert.Equal(t, "123", b["A"])
+	assert.Equal(t, "true", b["B"])
+}
+
+func TestStruct2MapInt(t *testing.T) {
+	a := &A{
+		A: "123",
+		B: true,
+	}
+
+	b := Must(ConvertTo[map[string]int](a))
+	assert.Equal(t, 123, b["A"])
+	assert.Equal(t, 1, b["B"])
+}
+
+func TestStruct2PtrMapString(t *testing.T) {
+	a := &A{
+		A: "123",
+		B: true,
+	}
+
+	b := Must(ConvertTo[*map[string]string](a))
+	assert.Equal(t, "123", (*b)["A"])
+	assert.Equal(t, "true", (*b)["B"])
 }

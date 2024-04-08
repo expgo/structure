@@ -22,7 +22,7 @@ func TestInt2BoolMapper(t *testing.T) {
 			from := reflect.ValueOf(tt.input)
 			var to bool
 			toV := reflect.ValueOf(&to).Elem()
-			err := int2boolMapper(from, toV)
+			err := int2boolMapper(from, toV, nil)
 			if err != nil {
 				t.Fatalf("Unexpected error: %v", err)
 			}
@@ -50,7 +50,7 @@ func TestInt2IntMapper(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			fromVal := reflect.ValueOf(tt.from)
 			toVal := reflect.ValueOf(&tt.to).Elem()
-			err := int2intMapper(fromVal, toVal)
+			err := int2intMapper(fromVal, toVal, nil)
 			if err != nil {
 				t.Errorf("Got error %v", err)
 				return
@@ -106,7 +106,7 @@ func TestInt2UintMapper(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			from := reflect.ValueOf(tc.from)
 			to := reflect.New(reflect.TypeOf(tc.want)).Elem()
-			gotErr := int2uintMapper(from, to)
+			gotErr := int2uintMapper(from, to, nil)
 			if (gotErr != nil) != tc.wantErr {
 				t.Errorf("int2uintMapper() error = %v, wantErr %v", gotErr, tc.wantErr)
 				return
@@ -156,7 +156,7 @@ func TestInt2floatMapper(t *testing.T) {
 			from := reflect.ValueOf(tc.input)
 			to := reflect.New(reflect.TypeOf(tc.expected)).Elem()
 
-			err := int2floatMapper(from, to)
+			err := int2floatMapper(from, to, nil)
 			if err != nil {
 				t.Fatalf("expected no error but got: %v", err)
 			}
@@ -204,7 +204,7 @@ func TestInt2stringMapper(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			to := reflect.New(reflect.TypeOf("")).Elem()
-			err := int2stringMapper(tc.from, to)
+			err := int2stringMapper(tc.from, to, nil)
 			if err != nil {
 				t.Fatalf("Unexpected error: %v", err)
 			}
