@@ -252,3 +252,25 @@ func TestStruct2PtrMapString(t *testing.T) {
 	assert.Equal(t, "123", (*b)["A"])
 	assert.Equal(t, "true", (*b)["B"])
 }
+
+func TestMap2Map(t *testing.T) {
+	a := map[string]int{
+		"123": 1,
+		"456": 0,
+	}
+
+	b := Must(ConvertTo[map[int]bool](a))
+	assert.Equal(t, true, b[123])
+	assert.Equal(t, false, b[456])
+}
+
+func TestMap2Struct(t *testing.T) {
+	b := map[string]int{
+		"A": 123,
+		"B": 1,
+	}
+
+	a := Must(ConvertTo[*A](b))
+	assert.Equal(t, "123", a.A)
+	assert.Equal(t, true, a.B)
+}

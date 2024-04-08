@@ -12,7 +12,56 @@ func init() {
 	RegisterKindMapper(reflect.Map, reflect.Struct, map2structMapper)
 }
 
-func map2mapMapper(from reflect.Value, to reflect.Value, _ *Option) error {
+func map2mapMapper(from reflect.Value, to reflect.Value, option *Option) error {
+	valType := to.Type()
+	valKeyType := valType.Key()
+	valElemType := valType.Elem()
+
+	// Accumulate errors
+	errors := make([]error, 0)
+
+	// If the input data is empty, then we just match what the input data is.
+	if from.Len() == 0 {
+		if from.IsNil() {
+			if !to.IsNil() {
+				to.Set(from)
+			}
+		} else {
+			to.Set(reflect.MakeMap(valType))
+		}
+
+		return nil
+	}
+
+	if to.IsNil() {
+		to.Set(reflect.MakeMap(valType))
+	}
+
+	for _, k := range from.MapKeys() {
+
+		// First decode the key into the proper type
+		currentKey := reflect.Indirect(reflect.New(valKeyType))
+		if err := MapToValueWithOption(k.Interface(), currentKey, option); err != nil {
+			errors = appendErrors(errors, err)
+			continue
+		}
+
+		// Next decode the data into the proper type
+		v := from.MapIndex(k).Interface()
+		currentVal := reflect.Indirect(reflect.New(valElemType))
+		if err := MapToValueWithOption(v, currentVal, option); err != nil {
+			errors = appendErrors(errors, err)
+			continue
+		}
+
+		to.SetMapIndex(currentKey, currentVal)
+	}
+
+	// If we had errors, return those
+	if len(errors) > 0 {
+		return &Error{errors}
+	}
+
 	return nil
 }
 
