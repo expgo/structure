@@ -21,6 +21,10 @@ func _walk(v any, walkFn WalkFunc, rootValues []reflect.Value) error {
 		val = val.Elem()
 	}
 
+	return _walkValue(val, walkFn, rootValues)
+}
+
+func _walkValue(val reflect.Value, walkFn WalkFunc, rootValues []reflect.Value) error {
 	rootValues = append(rootValues, val)
 	valType := val.Type()
 
@@ -35,11 +39,11 @@ func _walk(v any, walkFn WalkFunc, rootValues []reflect.Value) error {
 		}
 
 		// 尝试遍历内嵌型struct
-		// TODO 尝试遍历非导出结构体field
-		if reflect.Struct == ff.Kind() && ff.CanAddr() && ff.CanInterface() {
-			if err := _walk(ff.Addr().Interface(), walkFn, rootValues); err != nil {
+		if reflect.Struct == ff.Kind() {
+			if err := _walkValue(ff, walkFn, rootValues); err != nil {
 				return err
 			}
+			continue
 		}
 
 		if reflect.Slice == ff.Kind() {
