@@ -3,10 +3,9 @@ package structure
 import (
 	"errors"
 	"fmt"
-	"github.com/expgo/generic"
-	"github.com/expgo/generic/stream"
 	"reflect"
 	"strings"
+	"sync"
 )
 
 type Mapper func(from reflect.Value, to reflect.Value, option *Option) error
@@ -16,29 +15,42 @@ type typeKey struct {
 	to   reflect.Type
 }
 
-var typeMappers = generic.Map[typeKey, Mapper]{}
+var typeMappers = make(map[typeKey]Mapper)
+var typeMappersLock = &sync.RWMutex{}
 
 type kindKey struct {
 	from reflect.Kind
 	to   reflect.Kind
 }
 
-var kindMappers = generic.Map[kindKey, Mapper]{}
+var kindMappers = make(map[kindKey]Mapper)
+var kindMappersLock = &sync.RWMutex{}
 
 func RegisterMapper[From any, To any](mapper Mapper) {
 	fromType := reflect.TypeOf((*From)(nil)).Elem()
 	toType := reflect.TypeOf((*To)(nil)).Elem()
 
 	key := typeKey{from: fromType, to: toType}
-	if _, got := typeMappers.LoadOrStore(key, mapper); got {
+
+	typeMappersLock.Lock()
+	defer typeMappersLock.Unlock()
+
+	if _, got := typeMappers[key]; got {
 		panic(fmt.Sprintf("type %+v already registed", key))
+	} else {
+		typeMappers[key] = mapper
 	}
 }
 
 func RegisterKindMapper(from reflect.Kind, to reflect.Kind, mapper Mapper) {
 	key := kindKey{from: from, to: to}
-	if _, got := kindMappers.LoadOrStore(key, mapper); got {
+	kindMappersLock.Lock()
+	defer kindMappersLock.Unlock()
+
+	if _, got := kindMappers[key]; got {
 		panic(fmt.Sprintf("type %+v already registed", key))
+	} else {
+		kindMappers[key] = mapper
 	}
 }
 
@@ -46,7 +58,10 @@ func ReplaceMapper[From any, To any](mapper Mapper) {
 	fromType := reflect.TypeOf((*From)(nil)).Elem()
 	toType := reflect.TypeOf((*To)(nil)).Elem()
 
-	typeMappers.Store(typeKey{from: fromType, to: toType}, mapper)
+	typeMappersLock.Lock()
+	defer typeMappersLock.Unlock()
+
+	typeMappers[typeKey{from: fromType, to: toType}] = mapper
 }
 
 func NewOption() *Option {
@@ -241,7 +256,11 @@ func Value2ValueWithOption(from reflect.Value, to reflect.Value, option *Option)
 		return nil
 	}
 
-	if mapper, ok := kindMappers.Load(kindKey{from: fromType.Kind(), to: toType.Kind()}); ok {
+	kindMappersLock.RLock()
+	mapper, ok := kindMappers[kindKey{from: fromType.Kind(), to: toType.Kind()}]
+	kindMappersLock.RUnlock()
+
+	if ok {
 		if err := mapper(from, to, option); err != nil {
 			return err
 		}
@@ -255,13 +274,24 @@ func Value2ValueWithOption(from reflect.Value, to reflect.Value, option *Option)
 	}
 
 	// use type and to, get mapper
-	mapper, ok := typeMappers.Load(typeKey{from: fromType, to: toType})
+	typeMappersLock.RLock()
+	mapper, ok = typeMappers[typeKey{from: fromType, to: toType}]
+	typeMappersLock.RUnlock()
+
 	if !ok {
 		// do type alias
-		fromType, _ = typeAliasMap.LoadOrStore(fromType, fromType)
-		toType, _ = typeAliasMap.LoadOrStore(toType, toType)
+		typeAliasMapLock.RLock()
+		if fromTypeInMap, ok := typeAliasMap[fromType]; ok {
+			fromType = fromTypeInMap
+		}
+		if toTypeInMap, ok := typeAliasMap[toType]; ok {
+			toType = toTypeInMap
+		}
+		typeAliasMapLock.RUnlock()
 
-		mapper, ok = typeMappers.Load(typeKey{from: fromType, to: toType})
+		typeMappersLock.RLock()
+		mapper, ok = typeMappers[typeKey{from: fromType, to: toType}]
+		typeMappersLock.RUnlock()
 	}
 
 	if ok {
@@ -272,16 +302,12 @@ func Value2ValueWithOption(from reflect.Value, to reflect.Value, option *Option)
 	}
 
 	// get all implements interface, no err, return direct
-	cachePairs := stream.Must(typeMappers.FilterToStream(func(k typeKey, v Mapper) bool {
-		if k.to.Kind() == reflect.Interface {
-			return toType.Implements(k.to) || reflect.PtrTo(toType).Implements(k.to)
-		}
-		return false
-	}).ToSlice())
-
-	for _, cachePair := range cachePairs {
-		if err := cachePair.V(from, to, option); err == nil {
-			return nil
+	for k, v := range typeMappers {
+		if k.to.Kind() == reflect.Interface &&
+			(toType.Implements(k.to) || reflect.PtrTo(toType).Implements(k.to)) {
+			if err := v(from, to, option); err == nil {
+				return nil
+			}
 		}
 	}
 

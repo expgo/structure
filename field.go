@@ -3,7 +3,6 @@ package structure
 import (
 	"errors"
 	"fmt"
-	"github.com/expgo/generic/stream"
 	"reflect"
 	"strings"
 	"unsafe"
@@ -160,10 +159,10 @@ func GetFieldPath(structField reflect.StructField, rootValues []reflect.Value) s
 	var results []string
 	if len(rootValues) > 0 {
 		results = append(results, rootValues[0].Type().PkgPath())
-		names := stream.Must(stream.Map(stream.Of(rootValues), func(in reflect.Value) (string, error) {
-			return in.Type().Name(), nil
-		}).ToSlice())
-		results = append(results, names...)
+
+		for _, in := range rootValues {
+			results = append(results, in.Type().Name())
+		}
 	}
 
 	result := ""

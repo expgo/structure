@@ -2,11 +2,12 @@ package structure
 
 import (
 	"fmt"
-	"github.com/expgo/generic"
 	"reflect"
+	"sync"
 )
 
-var typeAliasMap = generic.Map[reflect.Type, reflect.Type]{}
+var typeAliasMap = make(map[reflect.Type]reflect.Type)
+var typeAliasMapLock = &sync.RWMutex{}
 
 func init() {
 	AddTypeAliasMap[int8, int]()
@@ -26,7 +27,12 @@ func AddTypeAliasMap[Name any, Alias any]() {
 	nameType := reflect.TypeOf((*Name)(nil)).Elem()
 	aliasType := reflect.TypeOf((*Alias)(nil)).Elem()
 
-	if v, got := typeAliasMap.LoadOrStore(nameType, aliasType); got {
+	typeAliasMapLock.Lock()
+	defer typeAliasMapLock.Unlock()
+
+	if v, got := typeAliasMap[nameType]; got {
 		panic(fmt.Sprintf("type '%v' already set alias to '%v'", nameType, v))
+	} else {
+		typeAliasMap[nameType] = aliasType
 	}
 }
