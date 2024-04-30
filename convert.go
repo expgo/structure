@@ -66,33 +66,33 @@ func ConvertToKindWithOption(from any, toKind reflect.Kind, option *Option) (any
 
 	switch toKind {
 	case reflect.Bool:
-		return ConvertTo[bool](from)
+		return ConvertToTypeWithOption(from, boolType, option)
 	case reflect.Int:
-		return ConvertTo[int](from)
+		return ConvertToTypeWithOption(from, intType, option)
 	case reflect.Int8:
-		return ConvertTo[int8](from)
+		return ConvertToTypeWithOption(from, int8Type, option)
 	case reflect.Int16:
-		return ConvertTo[int16](from)
+		return ConvertToTypeWithOption(from, int16Type, option)
 	case reflect.Int32:
-		return ConvertTo[int32](from)
+		return ConvertToTypeWithOption(from, int32Type, option)
 	case reflect.Int64:
-		return ConvertTo[int64](from)
+		return ConvertToTypeWithOption(from, int64Type, option)
 	case reflect.Uint:
-		return ConvertTo[uint](from)
+		return ConvertToTypeWithOption(from, uintType, option)
 	case reflect.Uint8:
-		return ConvertTo[uint8](from)
+		return ConvertToTypeWithOption(from, uint8Type, option)
 	case reflect.Uint16:
-		return ConvertTo[uint16](from)
+		return ConvertToTypeWithOption(from, uint16Type, option)
 	case reflect.Uint32:
-		return ConvertTo[uint32](from)
+		return ConvertToTypeWithOption(from, uint32Type, option)
 	case reflect.Uint64:
-		return ConvertTo[uint64](from)
+		return ConvertToTypeWithOption(from, uint64Type, option)
 	case reflect.Float32:
-		return ConvertTo[float32](from)
+		return ConvertToTypeWithOption(from, float32Type, option)
 	case reflect.Float64:
-		return ConvertTo[float64](from)
+		return ConvertToTypeWithOption(from, float64Type, option)
 	case reflect.String:
-		return ConvertTo[string](from)
+		return ConvertToTypeWithOption(from, stringType, option)
 	default:
 		return nil, errors.New(fmt.Sprintf("unsupported kind %s", toKind))
 	}

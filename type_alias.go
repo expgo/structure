@@ -10,17 +10,17 @@ var typeAliasMap = make(map[reflect.Type]reflect.Type)
 var typeAliasMapLock = &sync.RWMutex{}
 
 func init() {
-	AddTypeAliasMap[int8, int]()
-	AddTypeAliasMap[int16, int]()
-	AddTypeAliasMap[int32, int]()
-	AddTypeAliasMap[int64, int]()
+	addTypeAliasMap(int8Type, intType)
+	addTypeAliasMap(int16Type, intType)
+	addTypeAliasMap(int32Type, intType)
+	addTypeAliasMap(int64Type, intType)
 
-	AddTypeAliasMap[uint8, uint]()
-	AddTypeAliasMap[uint16, uint]()
-	AddTypeAliasMap[uint32, uint]()
-	AddTypeAliasMap[uint64, uint]()
+	addTypeAliasMap(uint8Type, uintType)
+	addTypeAliasMap(uint16Type, uintType)
+	addTypeAliasMap(uint32Type, uintType)
+	addTypeAliasMap(uint64Type, uintType)
 
-	AddTypeAliasMap[float32, float64]()
+	addTypeAliasMap(float32Type, float64Type)
 }
 
 func AddTypeAliasMap[Name any, Alias any]() {
