@@ -18,15 +18,14 @@ func ConvertTo[T any](from any) (T, error) {
 }
 
 func MustConvertTo[T any](from any) T {
-	return Must(ConvertTo[T](from))
+	return Must(ConvertToWithOption[T](from, defaultOption))
 }
 
-func ConvertToWithOption[T any](from any, option *Option) (t T, err error) {
-	result, err := ConvertToTypeWithOption(from, reflect.TypeOf((*T)(nil)).Elem(), option)
-	if err != nil {
-		return t, err
-	} else {
+func ConvertToWithOption[T any](from any, option *Option) (t T, e error) {
+	if result, err := ConvertToTypeWithOption(from, reflect.TypeOf((*T)(nil)).Elem(), option); err == nil {
 		return result.(T), nil
+	} else {
+		return t, err
 	}
 }
 
