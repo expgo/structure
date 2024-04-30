@@ -3,11 +3,11 @@ package structure
 import "reflect"
 
 func init() {
-	RegisterMapper[bool, bool](bool2boolMapper)
-	RegisterMapper[bool, int](bool2intMapper)
-	RegisterMapper[bool, uint](bool2uintMapper)
-	RegisterMapper[bool, float64](bool2floatMapper)
-	RegisterMapper[bool, string](bool2stringMapper)
+	registerMapper(boolType, boolType, bool2boolMapper)
+	registerMapper(boolType, intType, bool2intMapper)
+	registerMapper(boolType, uintType, bool2uintMapper)
+	registerMapper(boolType, float64Type, bool2floatMapper)
+	registerMapper(boolType, stringType, bool2stringMapper)
 }
 
 func bool2boolMapper(from reflect.Value, to reflect.Value, _ *Option) error {

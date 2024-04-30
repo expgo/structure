@@ -9,9 +9,9 @@ import (
 )
 
 func init() {
-	RegisterMapper[string, encoding.TextUnmarshaler](string2TextUnmarshalerMapper)
-	RegisterMapper[string, encoding.BinaryUnmarshaler](string2BinaryUnmarshalerMapper)
-	RegisterMapper[string, time.Duration](string2durationMapper)
+	registerMapper(stringType, reflect.TypeOf((*encoding.TextUnmarshaler)(nil)).Elem(), string2TextUnmarshalerMapper)
+	registerMapper(stringType, reflect.TypeOf((*encoding.BinaryUnmarshaler)(nil)).Elem(), string2BinaryUnmarshalerMapper)
+	registerMapper(stringType, reflect.TypeOf((*time.Duration)(nil)).Elem(), string2durationMapper)
 }
 
 func string2TextUnmarshalerMapper(from reflect.Value, to reflect.Value, _ *Option) error {

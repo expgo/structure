@@ -24,9 +24,10 @@ func init() {
 }
 
 func AddTypeAliasMap[Name any, Alias any]() {
-	nameType := reflect.TypeOf((*Name)(nil)).Elem()
-	aliasType := reflect.TypeOf((*Alias)(nil)).Elem()
+	addTypeAliasMap(reflect.TypeOf((*Name)(nil)).Elem(), reflect.TypeOf((*Alias)(nil)).Elem())
+}
 
+func addTypeAliasMap(nameType reflect.Type, aliasType reflect.Type) {
 	typeAliasMapLock.Lock()
 	defer typeAliasMapLock.Unlock()
 

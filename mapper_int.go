@@ -6,11 +6,11 @@ import (
 )
 
 func init() {
-	RegisterMapper[int, bool](int2boolMapper)
-	RegisterMapper[int, int](int2intMapper)
-	RegisterMapper[int, uint](int2uintMapper)
-	RegisterMapper[int, float64](int2floatMapper)
-	RegisterMapper[int, string](int2stringMapper)
+	registerMapper(intType, boolType, int2boolMapper)
+	registerMapper(intType, intType, int2intMapper)
+	registerMapper(intType, uintType, int2uintMapper)
+	registerMapper(intType, float64Type, int2floatMapper)
+	registerMapper(intType, stringType, int2stringMapper)
 }
 
 func int2boolMapper(from reflect.Value, to reflect.Value, _ *Option) error {

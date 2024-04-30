@@ -27,9 +27,10 @@ var kindMappers = make(map[kindKey]Mapper)
 var kindMappersLock = &sync.RWMutex{}
 
 func RegisterMapper[From any, To any](mapper Mapper) {
-	fromType := reflect.TypeOf((*From)(nil)).Elem()
-	toType := reflect.TypeOf((*To)(nil)).Elem()
+	registerMapper(reflect.TypeOf((*From)(nil)).Elem(), reflect.TypeOf((*To)(nil)).Elem(), mapper)
+}
 
+func registerMapper(fromType reflect.Type, toType reflect.Type, mapper Mapper) {
 	key := typeKey{from: fromType, to: toType}
 
 	typeMappersLock.Lock()

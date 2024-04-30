@@ -8,11 +8,11 @@ import (
 )
 
 func init() {
-	RegisterMapper[string, bool](string2boolMapper)
-	RegisterMapper[string, int](string2intMapper)
-	RegisterMapper[string, uint](string2uintMapper)
-	RegisterMapper[string, float64](string2floatMapper)
-	RegisterMapper[string, string](string2stringMapper)
+	registerMapper(stringType, boolType, string2boolMapper)
+	registerMapper(stringType, intType, string2intMapper)
+	registerMapper(stringType, uintType, string2uintMapper)
+	registerMapper(stringType, float64Type, string2floatMapper)
+	registerMapper(stringType, stringType, string2stringMapper)
 }
 
 func string2boolMapper(from reflect.Value, to reflect.Value, _ *Option) error {
