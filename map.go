@@ -252,10 +252,10 @@ func Value2ValueWithOption(from reflect.Value, to reflect.Value, option *Option)
 	toType := to.Type()
 
 	// if the from and to type is same, set and return direct
-	if fromType == toType {
-		to.Set(from)
-		return nil
-	}
+	//if fromType == toType {
+	//	to.Set(from)
+	//	return nil
+	//}
 
 	kindMappersLock.RLock()
 	mapper, ok := kindMappers[kindKey{from: fromType.Kind(), to: toType.Kind()}]
