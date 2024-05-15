@@ -251,12 +251,6 @@ func Value2ValueWithOption(from reflect.Value, to reflect.Value, option *Option)
 	fromType := from.Type()
 	toType := to.Type()
 
-	// if the from and to type is same, set and return direct
-	//if fromType == toType {
-	//	to.Set(from)
-	//	return nil
-	//}
-
 	kindMappersLock.RLock()
 	mapper, ok := kindMappers[kindKey{from: fromType.Kind(), to: toType.Kind()}]
 	kindMappersLock.RUnlock()
@@ -310,6 +304,12 @@ func Value2ValueWithOption(from reflect.Value, to reflect.Value, option *Option)
 				return nil
 			}
 		}
+	}
+
+	// if the from and to type is same, set and return direct
+	if fromType == toType {
+		to.Set(from)
+		return nil
 	}
 
 	return errors.New(fmt.Sprintf("no mapper found for type %+v to %+v", fromType, toType))
