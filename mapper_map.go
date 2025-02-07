@@ -210,6 +210,18 @@ func map2structMapper(from reflect.Value, to reflect.Value, option *Option) erro
 		//	fieldName = name + "." + fieldName
 		//}
 
+		// support struct* to struct*: used in log-pipe
+		if rawMapVal.Interface() != nil {
+			fromVal := reflect.ValueOf(rawMapVal.Interface())
+
+			if fromVal.Kind() == reflect.Ptr && fieldValue.Kind() == reflect.Ptr {
+				if fromVal.Type() == fieldValue.Type() {
+					SetField(fieldValue, fromVal.Interface())
+					continue
+				}
+			}
+		}
+
 		if err := MapToValueWithOption(rawMapVal.Interface(), fieldValue, option); err != nil {
 			errors = appendErrors(errors, err)
 		}
